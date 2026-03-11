@@ -286,6 +286,7 @@
             this.btnPrevPage.TabIndex = 1;
             this.btnPrevPage.Text = "Назад";
             this.btnPrevPage.UseVisualStyleBackColor = false;
+            this.btnPrevPage.Click += new System.EventHandler(this.btnPrevPage_Click);
             // 
             // flowPanelPages
             // 
@@ -308,6 +309,7 @@
             this.btnNextPage.TabIndex = 3;
             this.btnNextPage.Text = "Вперед";
             this.btnNextPage.UseVisualStyleBackColor = false;
+            this.btnNextPage.Click += new System.EventHandler(this.btnNextPage_Click);
             // 
             // BooksForm
             // 

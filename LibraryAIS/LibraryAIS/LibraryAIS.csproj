@@ -112,6 +112,7 @@
     <Compile Include="GroupsForm.Designer.cs">
       <DependentUpon>GroupsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="InactivityTracker.cs" />
     <Compile Include="InputHelper.cs" />
     <Compile Include="LoginForm.cs">
       <SubType>Form</SubType>
@@ -139,6 +140,12 @@
     </Compile>
     <Compile Include="ReportsForm.Designer.cs">
       <DependentUpon>ReportsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingsForm.Designer.cs">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="SimpleDictionaryEditForm.cs">
       <SubType>Form</SubType>

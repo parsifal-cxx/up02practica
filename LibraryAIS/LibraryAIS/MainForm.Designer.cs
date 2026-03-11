@@ -28,6 +28,7 @@
             this.menuUsers = new System.Windows.Forms.ToolStripMenuItem();
             this.menuReports = new System.Windows.Forms.ToolStripMenuItem();
             this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
+            this.TimerMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.statusUser = new System.Windows.Forms.ToolStripStatusLabel();
             this.statusRole = new System.Windows.Forms.ToolStripStatusLabel();
@@ -47,7 +48,8 @@
             this.menuCatalogs,
             this.menuUsers,
             this.menuReports,
-            this.menuExit});
+            this.menuExit,
+            this.TimerMenu});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1000, 27);
@@ -134,6 +136,13 @@
             this.menuExit.Text = "Выход";
             this.menuExit.Click += new System.EventHandler(this.menuExit_Click);
             // 
+            // TimerMenu
+            // 
+            this.TimerMenu.Name = "TimerMenu";
+            this.TimerMenu.Size = new System.Drawing.Size(158, 23);
+            this.TimerMenu.Text = "Таймер неактивности";
+            this.TimerMenu.Click += new System.EventHandler(this.TimerMenu_Click);
+            // 
             // statusStrip
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -211,7 +220,7 @@
         private System.Windows.Forms.ToolStripMenuItem menuAuthors;
         private System.Windows.Forms.ToolStripMenuItem menuCategories;
         private System.Windows.Forms.ToolStripMenuItem menuPublishers;
-        private System.Windows.Forms.ToolStripMenuItem menuGroups; // Новое поле
+        private System.Windows.Forms.ToolStripMenuItem menuGroups;
         private System.Windows.Forms.ToolStripMenuItem menuUsers;
         private System.Windows.Forms.ToolStripMenuItem menuReports;
         private System.Windows.Forms.ToolStripMenuItem menuExit;
@@ -220,5 +229,6 @@
         private System.Windows.Forms.ToolStripStatusLabel statusRole;
         private System.Windows.Forms.Label lblWelcome;
         private System.Windows.Forms.Panel panelContent;
+        private System.Windows.Forms.ToolStripMenuItem TimerMenu;
     }
 }

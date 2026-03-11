@@ -22,5 +22,29 @@ namespace LibraryAIS.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
+        public int InactivityTimeout {
+            get {
+                return ((int)(this["InactivityTimeout"]));
+            }
+            set {
+                this["InactivityTimeout"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EnableInactivityLock {
+            get {
+                return ((bool)(this["EnableInactivityLock"]));
+            }
+            set {
+                this["EnableInactivityLock"] = value;
+            }
+        }
     }
 }

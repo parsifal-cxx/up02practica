@@ -28,6 +28,7 @@ namespace LibraryAIS
             menuCatalogs.Visible = false;
             menuUsers.Visible = false;
             menuReports.Visible = false;
+            TimerMenu.Visible = false;
 
             // Скрываем подпункты справочников по умолчанию
             menuAuthors.Visible = false;
@@ -44,6 +45,7 @@ namespace LibraryAIS
                 // Админ видит только справочник групп
                 menuCatalogs.Visible = true;
                 menuGroups.Visible = true;
+                TimerMenu.Visible = true;
             }
             else if (CurrentUser.IsLibrarian)
             {
@@ -134,6 +136,12 @@ namespace LibraryAIS
             {
                 e.Cancel = true;
             }
+        }
+
+        private void TimerMenu_Click(object sender, EventArgs e)
+        {
+            SettingsForm settingsForm = new SettingsForm();
+            settingsForm.ShowDialog();
         }
     }
 }

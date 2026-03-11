@@ -9,10 +9,12 @@ namespace LibraryAIS
     {
         private DataTable booksTable;
         private DataView booksView;
+        private PaginationHelper pagination;
 
         public BooksForm()
         {
             InitializeComponent();
+            pagination = new PaginationHelper(20);
         }
 
         private void BooksForm_Load(object sender, EventArgs e)
@@ -78,7 +80,165 @@ namespace LibraryAIS
             cmbSort.SelectedIndex = 0;
         }
 
+        /// <summary>
+        /// Загрузка книг с учетом пагинации
+        /// </summary>
         private void LoadBooks()
+        {
+            // Сбрасываем на первую страницу
+            pagination.Reset();
+
+            // Подсчитываем общее количество записей
+            UpdateTotalRecords();
+
+            // Загружаем данные текущей страницы
+            LoadPageData();
+        }
+
+        /// <summary>
+        /// Подсчет общего количества записей с учетом фильтров
+        /// </summary>
+        private void UpdateTotalRecords()
+        {
+            string countQuery = BuildCountQuery();
+            MySqlParameter[] parameters = BuildQueryParameters();
+
+            object result = DatabaseHelper.ExecuteScalar(countQuery, parameters);
+            pagination.TotalRecords = result != null ? Convert.ToInt32(result) : 0;
+        }
+
+        /// <summary>
+        /// Построение запроса для подсчета записей
+        /// </summary>
+        private string BuildCountQuery()
+        {
+            string baseQuery = @"SELECT COUNT(DISTINCT b.BookID)
+                FROM books b
+                LEFT JOIN authors a1 ON b.AuthorOne = a1.AuthorID
+                LEFT JOIN authors a2 ON b.AuthorTwo = a2.AuthorID
+                LEFT JOIN publishers p ON b.Publisher = p.PublisherID
+                LEFT JOIN bookcategories bc ON b.BookID = bc.BookID
+                LEFT JOIN categories c ON bc.CategoryID = c.CategoryID";
+
+            string whereClause = BuildWhereClause();
+
+            if (!string.IsNullOrEmpty(whereClause))
+            {
+                baseQuery += " WHERE " + whereClause;
+            }
+
+            return baseQuery;
+        }
+
+        /// <summary>
+        /// Построение WHERE условия для фильтрации
+        /// </summary>
+        private string BuildWhereClause()
+        {
+            string whereClause = "";
+
+            // Фильтр по поиску
+            if (!string.IsNullOrWhiteSpace(txtSearch.Text))
+            {
+                whereClause = "(b.Title LIKE @search OR CONCAT(a1.Surname, ' ', a1.Name) LIKE @search)";
+            }
+
+            // Фильтр по издательству
+            if (cmbFilterPublisher.SelectedValue != null)
+            {
+                int publisherId = 0;
+                if (int.TryParse(cmbFilterPublisher.SelectedValue.ToString(), out publisherId))
+                {
+                    if (publisherId > 0)
+                    {
+                        if (!string.IsNullOrEmpty(whereClause)) whereClause += " AND ";
+                        whereClause += "b.Publisher = @publisherId";
+                    }
+                }
+            }
+
+            // Фильтр по категории
+            if (cmbFilterCategory.SelectedValue != null)
+            {
+                int categoryId = 0;
+                if (int.TryParse(cmbFilterCategory.SelectedValue.ToString(), out categoryId))
+                {
+                    if (categoryId > 0)
+                    {
+                        if (!string.IsNullOrEmpty(whereClause)) whereClause += " AND ";
+                        whereClause += "bc.CategoryID = @categoryId";
+                    }
+                }
+            }
+
+            return whereClause;
+        }
+
+        /// <summary>
+        /// Построение параметров для SQL запроса
+        /// </summary>
+        private MySqlParameter[] BuildQueryParameters()
+        {
+            var paramsList = new System.Collections.Generic.List<MySqlParameter>();
+
+            // Параметр поиска
+            if (!string.IsNullOrWhiteSpace(txtSearch.Text))
+            {
+                paramsList.Add(new MySqlParameter("@search", "%" + txtSearch.Text.Trim() + "%"));
+            }
+
+            // Параметр издательства
+            if (cmbFilterPublisher.SelectedValue != null)
+            {
+                int publisherId = 0;
+                if (int.TryParse(cmbFilterPublisher.SelectedValue.ToString(), out publisherId))
+                {
+                    if (publisherId > 0)
+                    {
+                        paramsList.Add(new MySqlParameter("@publisherId", publisherId));
+                    }
+                }
+            }
+
+            // Параметр категории
+            if (cmbFilterCategory.SelectedValue != null)
+            {
+                int categoryId = 0;
+                if (int.TryParse(cmbFilterCategory.SelectedValue.ToString(), out categoryId))
+                {
+                    if (categoryId > 0)
+                    {
+                        paramsList.Add(new MySqlParameter("@categoryId", categoryId));
+                    }
+                }
+            }
+
+            // Параметры пагинации
+            paramsList.Add(new MySqlParameter("@limit", pagination.PageSize));
+            paramsList.Add(new MySqlParameter("@offset", pagination.Offset));
+
+            return paramsList.ToArray();
+        }
+
+        /// <summary>
+        /// Построение ORDER BY части запроса
+        /// </summary>
+        private string BuildOrderByClause()
+        {
+            switch (cmbSort.SelectedIndex)
+            {
+                case 1: return "ORDER BY b.Title ASC";
+                case 2: return "ORDER BY b.Title DESC";
+                case 3: return "ORDER BY b.Year DESC";
+                case 4: return "ORDER BY b.Year ASC";
+                default: return "ORDER BY b.Title ASC";
+            }
+        }
+
+        /// <summary>
+        /// Загрузка данных конкретной страницы
+        /// </summary>
+        private void LoadPageData()
         {
             string query = @"SELECT b.BookID, b.Title as 'Название', 
                     CONCAT(a1.Surname, ' ', a1.Name, ' ', IFNULL(a1.Patronymic, '')) as 'Автор',
@@ -94,125 +254,81 @@ namespace LibraryAIS
                     LEFT JOIN authors a2 ON b.AuthorTwo = a2.AuthorID
                     LEFT JOIN publishers p ON b.Publisher = p.PublisherID
                     LEFT JOIN bookcategories bc ON b.BookID = bc.BookID
-                    LEFT JOIN categories c ON bc.CategoryID = c.CategoryID
-                    ORDER BY b.Title";
+                    LEFT JOIN categories c ON bc.CategoryID = c.CategoryID";
 
-            booksTable = DatabaseHelper.ExecuteQuery(query);
-            booksView = new DataView(booksTable);
-            dgvBooks.DataSource = booksView;
+            string whereClause = BuildWhereClause();
+            if (!string.IsNullOrEmpty(whereClause))
+            {
+                query += " WHERE " + whereClause;
+            }
 
-            // Скрываем служебные колонки
+            query += " " + BuildOrderByClause();
+            query += " LIMIT @limit OFFSET @offset";
+
+            MySqlParameter[] parameters = BuildQueryParameters();
+
+            booksTable = DatabaseHelper.ExecuteQuery(query, parameters);
+            dgvBooks.DataSource = booksTable;
+
             if (dgvBooks.Columns.Contains("BookID"))
                 dgvBooks.Columns["BookID"].Visible = false;
             if (dgvBooks.Columns.Contains("PublisherID"))
                 dgvBooks.Columns["PublisherID"].Visible = false;
+
+            UpdateRecordsInfo();
+        }
+
+        private void UpdateRecordsInfo()
+        {
+            if (pagination.TotalRecords == 0)
+            {
+                lblRecordsInfo.Text = "Записей: 0 из 0";
+            }
+            else
+            {
+                lblRecordsInfo.Text = string.Format("Записей: {0}-{1} из {2}",
+                    pagination.GetStartRecord(),
+                    pagination.GetEndRecord(),
+                    pagination.TotalRecords);
+            }
         }
 
         private void ApplyFilters()
         {
-            if (booksView == null) return;
-
-            string filter = "";
-
-            if (!string.IsNullOrWhiteSpace(txtSearch.Text))
-            {
-                string searchText = txtSearch.Text.Replace("'", "''");
-                filter = "(Название LIKE '%" + searchText + "%' OR Автор LIKE '%" + searchText + "%')";
-            }
-
-            if (cmbFilterPublisher.SelectedValue != null)
-            {
-                int publisherId = 0;
-                if (int.TryParse(cmbFilterPublisher.SelectedValue.ToString(), out publisherId))
-                {
-                    if (publisherId > 0)
-                    {
-                        if (!string.IsNullOrEmpty(filter)) filter += " AND ";
-                        filter += "PublisherID = " + publisherId;
-                    }
-                }
-            }
-
-            booksView.RowFilter = filter;
-            ApplySort();
+            pagination.Reset();
+            UpdateTotalRecords();
+            LoadPageData();
         }
 
         private void ApplySort()
         {
-            if (booksView == null) return;
-
-            switch (cmbSort.SelectedIndex)
-            {
-                case 1: booksView.Sort = "Название ASC"; break;
-                case 2: booksView.Sort = "Название DESC"; break;
-                case 3: booksView.Sort = "Год DESC"; break;
-                case 4: booksView.Sort = "Год ASC"; break;
-                default: booksView.Sort = ""; break;
-            }
+            LoadPageData();
         }
 
         private void FilterByCategory()
         {
-            if (cmbFilterCategory.SelectedValue == null) return;
-
-            int categoryId = 0;
-            if (!int.TryParse(cmbFilterCategory.SelectedValue.ToString(), out categoryId)) return;
-
-            string query;
-            if (categoryId > 0)
-            {
-                query = @"SELECT b.BookID, b.Title as 'Название', 
-                CONCAT(a1.Surname, ' ', a1.Name, ' ', IFNULL(a1.Patronymic, '')) as 'Автор',
-                IFNULL(CONCAT(a2.Surname, ' ', a2.Name, ' ', IFNULL(a2.Patronymic, '')), '') as 'Соавтор',
-                c.Name as 'Категория',
-                p.Name as 'Издательство',
-                b.Year as 'Год',
-                CAST(b.Count AS SIGNED) as 'Всего',
-                CAST(b.AvailableNow AS SIGNED) as 'Доступно',
-                b.Publisher as PublisherID
-                FROM books b
-                LEFT JOIN authors a1 ON b.AuthorOne = a1.AuthorID
-                LEFT JOIN authors a2 ON b.AuthorTwo = a2.AuthorID
-                LEFT JOIN publishers p ON b.Publisher = p.PublisherID
-                INNER JOIN bookcategories bc ON b.BookID = bc.BookID
-                LEFT JOIN categories c ON bc.CategoryID = c.CategoryID
-                WHERE bc.CategoryID = " + categoryId + @"
-                ORDER BY b.Title";
-            }
-            else
-            {
-                query = @"SELECT b.BookID, b.Title as 'Название', 
-                CONCAT(a1.Surname, ' ', a1.Name, ' ', IFNULL(a1.Patronymic, '')) as 'Автор',
-                IFNULL(CONCAT(a2.Surname, ' ', a2.Name, ' ', IFNULL(a2.Patronymic, '')), '') as 'Соавтор',
-                c.Name as 'Категория',
-                p.Name as 'Издательство',
-                b.Year as 'Год',
-                CAST(b.Count AS SIGNED) as 'Всего',
-                CAST(b.AvailableNow AS SIGNED) as 'Доступно',
-                b.Publisher as PublisherID
-                FROM books b
-                LEFT JOIN authors a1 ON b.AuthorOne = a1.AuthorID
-                LEFT JOIN authors a2 ON b.AuthorTwo = a2.AuthorID
-                LEFT JOIN publishers p ON b.Publisher = p.PublisherID
-                LEFT JOIN bookcategories bc ON b.BookID = bc.BookID
-                LEFT JOIN categories c ON bc.CategoryID = c.CategoryID
-                ORDER BY b.Title";
-            }
-
-            booksTable = DatabaseHelper.ExecuteQuery(query);
-            booksView = new DataView(booksTable);
-            dgvBooks.DataSource = booksView;
-
-            if (dgvBooks.Columns.Contains("BookID")) dgvBooks.Columns["BookID"].Visible = false;
-            if (dgvBooks.Columns.Contains("PublisherID")) dgvBooks.Columns["PublisherID"].Visible = false;
-
             ApplyFilters();
         }
 
-        private void txtSearch_TextChanged(object sender, EventArgs e) { ApplyFilters(); }
-        private void cmbFilterCategory_SelectedIndexChanged(object sender, EventArgs e) { FilterByCategory(); }
-        private void cmbFilterPublisher_SelectedIndexChanged(object sender, EventArgs e) { ApplyFilters(); }
-        private void cmbSort_SelectedIndexChanged(object sender, EventArgs e) { ApplySort(); }
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            ApplyFilters();
+        }
+
+        private void cmbFilterCategory_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            FilterByCategory();
+        }
+
+        private void cmbFilterPublisher_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ApplyFilters();
+        }
+
+        private void cmbSort_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ApplySort();
+        }
 
         private void btnResetFilters_Click(object sender, EventArgs e)
         {
@@ -222,10 +338,6 @@ namespace LibraryAIS
             cmbSort.SelectedIndex = 0;
             LoadBooks();
         }
-
-        // ============================================
-        // ЛОГИКА ЗАКУПКИ И СПИСАНИЯ
-        // ============================================
 
         private void btnPurchase_Click(object sender, EventArgs e)
         {
@@ -263,7 +375,7 @@ namespace LibraryAIS
                 StockOperationForm stockForm = new StockOperationForm(bookId, true);
                 if (stockForm.ShowDialog() == DialogResult.OK)
                 {
-                    LoadBooks();
+                    LoadPageData(); // Обновляем только текущую страницу
                 }
             }
         }
@@ -284,7 +396,7 @@ namespace LibraryAIS
 
             if (stockForm.ShowDialog() == DialogResult.OK)
             {
-                LoadBooks(); // Обновляем данные
+                LoadPageData(); // Обновляем только текущую страницу
 
                 // Проверка на нулевой остаток
                 int currentCount = Convert.ToInt32(DatabaseHelper.ExecuteScalar(
@@ -301,7 +413,8 @@ namespace LibraryAIS
                     {
                         DatabaseHelper.ExecuteNonQuery("DELETE FROM bookcategories WHERE BookID = " + bookId);
                         DatabaseHelper.ExecuteNonQuery("DELETE FROM books WHERE BookID = " + bookId);
-                        MessageBox.Show("Карточка книги удалена.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Карточка книги удалена.", "Информация",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
                         LoadBooks();
                     }
                 }
@@ -312,7 +425,8 @@ namespace LibraryAIS
         {
             if (dgvBooks.SelectedRows.Count == 0)
             {
-                MessageBox.Show("Выберите книгу для редактирования!", "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Выберите книгу для редактирования!", "Внимание",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -320,12 +434,20 @@ namespace LibraryAIS
             BookEditForm editForm = new BookEditForm(bookId);
             if (editForm.ShowDialog() == DialogResult.OK)
             {
-                LoadBooks();
+                LoadPageData(); // Обновляем только текущую страницу
             }
         }
 
-        private void btnRefresh_Click(object sender, EventArgs e) { LoadBooks(); }
-        private void btnClose_Click(object sender, EventArgs e) { this.Close(); }
+        private void btnRefresh_Click(object sender, EventArgs e)
+        {
+            LoadBooks();
+        }
+
+        private void btnClose_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
         private void BooksForm_FormClosing(object sender, FormClosingEventArgs e) { }
 
         private void dgvBooks_CellDoubleClick(object sender, DataGridViewCellEventArgs e)

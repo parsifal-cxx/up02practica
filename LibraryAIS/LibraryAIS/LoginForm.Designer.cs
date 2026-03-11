@@ -24,7 +24,15 @@
             this.btnLogin = new System.Windows.Forms.Button();
             this.btnExit = new System.Windows.Forms.Button();
             this.panelMain = new System.Windows.Forms.Panel();
+            this.lblBlockMessage = new System.Windows.Forms.Label();
+            this.captchaPanel = new System.Windows.Forms.Panel();
+            this.btnRefreshCaptcha = new System.Windows.Forms.Button();
+            this.txtCaptcha = new System.Windows.Forms.TextBox();
+            this.lblCaptcha = new System.Windows.Forms.Label();
+            this.pictureBoxCaptcha = new System.Windows.Forms.PictureBox();
             this.panelMain.SuspendLayout();
+            this.captchaPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCaptcha)).BeginInit();
             this.SuspendLayout();
             // 
             // lblTitle
@@ -107,6 +115,8 @@
             // panelMain
             // 
             this.panelMain.BackColor = System.Drawing.Color.White;
+            this.panelMain.Controls.Add(this.lblBlockMessage);
+            this.panelMain.Controls.Add(this.captchaPanel);
             this.panelMain.Controls.Add(this.lblTitle);
             this.panelMain.Controls.Add(this.lblLogin);
             this.panelMain.Controls.Add(this.lblPassword);
@@ -118,6 +128,73 @@
             this.panelMain.Name = "panelMain";
             this.panelMain.Size = new System.Drawing.Size(400, 260);
             this.panelMain.TabIndex = 7;
+            // 
+            // lblBlockMessage
+            // 
+            this.lblBlockMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lblBlockMessage.ForeColor = System.Drawing.Color.Red;
+            this.lblBlockMessage.Location = new System.Drawing.Point(50, 245);
+            this.lblBlockMessage.Name = "lblBlockMessage";
+            this.lblBlockMessage.Size = new System.Drawing.Size(300, 25);
+            this.lblBlockMessage.TabIndex = 10;
+            this.lblBlockMessage.Text = "Вход заблокирован...";
+            this.lblBlockMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblBlockMessage.Visible = false;
+            // 
+            // captchaPanel
+            // 
+            this.captchaPanel.Controls.Add(this.btnRefreshCaptcha);
+            this.captchaPanel.Controls.Add(this.txtCaptcha);
+            this.captchaPanel.Controls.Add(this.lblCaptcha);
+            this.captchaPanel.Controls.Add(this.pictureBoxCaptcha);
+            this.captchaPanel.Location = new System.Drawing.Point(10, 280);
+            this.captchaPanel.Name = "captchaPanel";
+            this.captchaPanel.Size = new System.Drawing.Size(380, 110);
+            this.captchaPanel.TabIndex = 8;
+            this.captchaPanel.Visible = false;
+            // 
+            // btnRefreshCaptcha
+            // 
+            this.btnRefreshCaptcha.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(149)))), ((int)(((byte)(237)))));
+            this.btnRefreshCaptcha.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRefreshCaptcha.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnRefreshCaptcha.ForeColor = System.Drawing.Color.White;
+            this.btnRefreshCaptcha.Location = new System.Drawing.Point(240, 70);
+            this.btnRefreshCaptcha.Name = "btnRefreshCaptcha";
+            this.btnRefreshCaptcha.Size = new System.Drawing.Size(100, 26);
+            this.btnRefreshCaptcha.TabIndex = 9;
+            this.btnRefreshCaptcha.Text = "Обновить";
+            this.btnRefreshCaptcha.UseVisualStyleBackColor = false;
+            //this.btnRefreshCaptcha.Click += new System.EventHandler(this.btnRefreshCaptcha_Click);
+            // 
+            // txtCaptcha
+            // 
+            this.txtCaptcha.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.txtCaptcha.Location = new System.Drawing.Point(40, 70);
+            this.txtCaptcha.MaxLength = 4;
+            this.txtCaptcha.Name = "txtCaptcha";
+            this.txtCaptcha.Size = new System.Drawing.Size(180, 26);
+            this.txtCaptcha.TabIndex = 8;
+            // 
+            // lblCaptcha
+            // 
+            this.lblCaptcha.AutoSize = true;
+            this.lblCaptcha.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.lblCaptcha.Location = new System.Drawing.Point(37, 47);
+            this.lblCaptcha.Name = "lblCaptcha";
+            this.lblCaptcha.Size = new System.Drawing.Size(243, 17);
+            this.lblCaptcha.TabIndex = 7;
+            this.lblCaptcha.Text = "Введите код с изображения:";
+            // 
+            // pictureBoxCaptcha
+            // 
+            this.pictureBoxCaptcha.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pictureBoxCaptcha.Location = new System.Drawing.Point(40, 5);
+            this.pictureBoxCaptcha.Name = "pictureBoxCaptcha";
+            this.pictureBoxCaptcha.Size = new System.Drawing.Size(300, 80);
+            this.pictureBoxCaptcha.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBoxCaptcha.TabIndex = 6;
+            this.pictureBoxCaptcha.TabStop = false;
             // 
             // LoginForm
             // 
@@ -135,8 +212,10 @@
             this.Text = "АИС Библиотека - Авторизация";
             this.panelMain.ResumeLayout(false);
             this.panelMain.PerformLayout();
+            this.captchaPanel.ResumeLayout(false);
+            this.captchaPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCaptcha)).EndInit();
             this.ResumeLayout(false);
-
         }
 
         private System.Windows.Forms.Label lblTitle;
@@ -147,5 +226,11 @@
         private System.Windows.Forms.Button btnLogin;
         private System.Windows.Forms.Button btnExit;
         private System.Windows.Forms.Panel panelMain;
+        private System.Windows.Forms.Panel captchaPanel;
+        private System.Windows.Forms.PictureBox pictureBoxCaptcha;
+        private System.Windows.Forms.Label lblCaptcha;
+        private System.Windows.Forms.TextBox txtCaptcha;
+        private System.Windows.Forms.Button btnRefreshCaptcha;
+        private System.Windows.Forms.Label lblBlockMessage;
     }
 }

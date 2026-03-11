@@ -39,6 +39,8 @@
             this.captchaPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCaptcha)).BeginInit();
             this.SuspendLayout();
+
+            this.Load += new System.EventHandler(this.LoginForm_Load);
             // 
             // lblTitle
             // 

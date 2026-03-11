@@ -13,6 +13,7 @@ namespace LibraryAIS
         private string currentCaptcha = "";
         private int blockTimeLeft = 0;
         private Timer blockTimer;
+        private bool isReturningFromMainForm = false;
 
         public LoginForm()
         {
@@ -23,6 +24,19 @@ namespace LibraryAIS
             blockTimer = new Timer();
             blockTimer.Interval = 1000; // 1 секунда
             blockTimer.Tick += BlockTimer_Tick;
+        }
+        public LoginForm(bool isReturning) : this()
+        {
+            this.isReturningFromMainForm = isReturning;
+        }
+
+        private void LoginForm_Load(object sender, EventArgs e)
+        {
+            // Если это повторный вход после блокировки - показываем информацию
+            if (isReturningFromMainForm)
+            {
+                lblTitle.Text = "Повторная авторизация";
+            }
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -98,17 +112,40 @@ namespace LibraryAIS
                 failedAttempts = 0;
                 HideCaptcha();
 
-                // Открываем главную форму
-                MainForm mainForm = new MainForm();
+                // Если это повторный вход после блокировки - просто закрываем форму
+                if (isReturningFromMainForm)
+                {
+                    // Устанавливаем DialogResult.OK для MainForm
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                    return;
+                }
+
+                // Первый вход - открываем MainForm и показываем LoginForm снова после закрытия
+                this.DialogResult = DialogResult.OK;
                 this.Hide();
+
+                MainForm mainForm = new MainForm();
                 mainForm.ShowDialog();
 
-                // После закрытия главной формы - показываем форму авторизации снова
-                CurrentUser.Clear();
-                txtLogin.Clear();
-                txtPassword.Clear();
-                txtCaptcha.Clear();
-                this.Show();
+                // После закрытия MainForm
+                // Если пользователь вышел нормально - закрываем LoginForm
+                if (mainForm.DialogResult != DialogResult.OK)
+                {
+                    // Пользователь вышел - закрываем приложение
+                    Application.Exit();
+                }
+                else
+                {
+                    // Показываем форму авторизации снова (для возможности входа другого пользователя)
+                    CurrentUser.Clear();
+                    txtLogin.Clear();
+                    txtPassword.Clear();
+                    txtCaptcha.Clear();
+                    HideCaptcha();
+                    this.Show();
+                    txtLogin.Focus();
+                }
             }
             else
             {
@@ -218,13 +255,28 @@ namespace LibraryAIS
                 "Подтверждение выхода", MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                Application.Exit();
+                // Если это повторный вход - устанавливаем Cancel
+                if (isReturningFromMainForm)
+                {
+                    this.DialogResult = DialogResult.Cancel;
+                    this.Close();
+                }
+                else
+                {
+                    Application.Exit();
+                }
             }
         }
 
         private void pictureBoxCaptcha_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void LoginForm_FormLoad(object sender, EventArgs e)
+        {
+
+            txtLogin.Focus();
         }
     }
 }

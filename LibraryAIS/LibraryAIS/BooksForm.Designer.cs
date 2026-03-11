@@ -31,10 +31,16 @@
             this.btnWriteOff = new System.Windows.Forms.Button();
             this.btnEdit = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
+            this.panelPagination = new System.Windows.Forms.Panel();
+            this.lblRecordsInfo = new System.Windows.Forms.Label();
+            this.btnPrevPage = new System.Windows.Forms.Button();
+            this.flowPanelPages = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnNextPage = new System.Windows.Forms.Button();
             this.panelTop.SuspendLayout();
             this.panelSearch.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBooks)).BeginInit();
             this.panelButtons.SuspendLayout();
+            this.panelPagination.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelTop
@@ -113,6 +119,7 @@
             // 
             // cmbFilterCategory
             // 
+            this.cmbFilterCategory.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbFilterCategory.Location = new System.Drawing.Point(222, 36);
             this.cmbFilterCategory.Name = "cmbFilterCategory";
             this.cmbFilterCategory.Size = new System.Drawing.Size(180, 21);
@@ -129,6 +136,7 @@
             // 
             // cmbFilterPublisher
             // 
+            this.cmbFilterPublisher.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbFilterPublisher.Location = new System.Drawing.Point(412, 36);
             this.cmbFilterPublisher.Name = "cmbFilterPublisher";
             this.cmbFilterPublisher.Size = new System.Drawing.Size(200, 21);
@@ -145,6 +153,7 @@
             // 
             // cmbSort
             // 
+            this.cmbSort.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbSort.Location = new System.Drawing.Point(622, 36);
             this.cmbSort.Name = "cmbSort";
             this.cmbSort.Size = new System.Drawing.Size(180, 21);
@@ -168,7 +177,7 @@
             this.dgvBooks.RowHeadersVisible = false;
             this.dgvBooks.RowHeadersWidth = 51;
             this.dgvBooks.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvBooks.Size = new System.Drawing.Size(1000, 380);
+            this.dgvBooks.Size = new System.Drawing.Size(1000, 330);
             this.dgvBooks.TabIndex = 2;
             this.dgvBooks.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvBooks_CellDoubleClick);
             // 
@@ -241,6 +250,65 @@
             this.btnClose.UseVisualStyleBackColor = false;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
+            // panelPagination
+            // 
+            this.panelPagination.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.panelPagination.Controls.Add(this.lblRecordsInfo);
+            this.panelPagination.Controls.Add(this.btnPrevPage);
+            this.panelPagination.Controls.Add(this.flowPanelPages);
+            this.panelPagination.Controls.Add(this.btnNextPage);
+            this.panelPagination.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelPagination.Location = new System.Drawing.Point(0, 450);
+            this.panelPagination.Name = "panelPagination";
+            this.panelPagination.Size = new System.Drawing.Size(1000, 50);
+            this.panelPagination.TabIndex = 4;
+            // 
+            // lblRecordsInfo
+            // 
+            this.lblRecordsInfo.AutoSize = true;
+            this.lblRecordsInfo.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblRecordsInfo.Location = new System.Drawing.Point(10, 17);
+            this.lblRecordsInfo.Name = "lblRecordsInfo";
+            this.lblRecordsInfo.Size = new System.Drawing.Size(96, 15);
+            this.lblRecordsInfo.TabIndex = 0;
+            this.lblRecordsInfo.Text = "Записей: 0 из 0";
+            // 
+            // btnPrevPage
+            // 
+            this.btnPrevPage.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.btnPrevPage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(130)))), ((int)(((byte)(180)))));
+            this.btnPrevPage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnPrevPage.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnPrevPage.ForeColor = System.Drawing.Color.White;
+            this.btnPrevPage.Location = new System.Drawing.Point(300, 10);
+            this.btnPrevPage.Name = "btnPrevPage";
+            this.btnPrevPage.Size = new System.Drawing.Size(80, 30);
+            this.btnPrevPage.TabIndex = 1;
+            this.btnPrevPage.Text = "Назад";
+            this.btnPrevPage.UseVisualStyleBackColor = false;
+            // 
+            // flowPanelPages
+            // 
+            this.flowPanelPages.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.flowPanelPages.Location = new System.Drawing.Point(385, 10);
+            this.flowPanelPages.Name = "flowPanelPages";
+            this.flowPanelPages.Size = new System.Drawing.Size(230, 30);
+            this.flowPanelPages.TabIndex = 2;
+            // 
+            // btnNextPage
+            // 
+            this.btnNextPage.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.btnNextPage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(130)))), ((int)(((byte)(180)))));
+            this.btnNextPage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnNextPage.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.btnNextPage.ForeColor = System.Drawing.Color.White;
+            this.btnNextPage.Location = new System.Drawing.Point(620, 10);
+            this.btnNextPage.Name = "btnNextPage";
+            this.btnNextPage.Size = new System.Drawing.Size(80, 30);
+            this.btnNextPage.TabIndex = 3;
+            this.btnNextPage.Text = "Вперед";
+            this.btnNextPage.UseVisualStyleBackColor = false;
+            // 
             // BooksForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -248,11 +316,12 @@
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1000, 550);
             this.Controls.Add(this.dgvBooks);
+            this.Controls.Add(this.panelPagination);
             this.Controls.Add(this.panelButtons);
             this.Controls.Add(this.panelSearch);
             this.Controls.Add(this.panelTop);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(900, 499);
+            this.MinimumSize = new System.Drawing.Size(900, 589);
             this.Name = "BooksForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Книги и материалы";
@@ -263,10 +332,16 @@
             this.panelSearch.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBooks)).EndInit();
             this.panelButtons.ResumeLayout(false);
+            this.panelPagination.ResumeLayout(false);
+            this.panelPagination.PerformLayout();
             this.ResumeLayout(false);
 
         }
-
+        private System.Windows.Forms.Panel panelPagination;
+        private System.Windows.Forms.Button btnPrevPage;
+        private System.Windows.Forms.Button btnNextPage;
+        private System.Windows.Forms.FlowLayoutPanel flowPanelPages;
+        private System.Windows.Forms.Label lblRecordsInfo;
         private System.Windows.Forms.Panel panelTop;
         private System.Windows.Forms.Label lblTitle;
         private System.Windows.Forms.Panel panelSearch;
@@ -281,8 +356,8 @@
         private System.Windows.Forms.Button btnResetFilters;
         private System.Windows.Forms.DataGridView dgvBooks;
         private System.Windows.Forms.Panel panelButtons;
-        private System.Windows.Forms.Button btnPurchase; // New
-        private System.Windows.Forms.Button btnWriteOff; // New
+        private System.Windows.Forms.Button btnPurchase;
+        private System.Windows.Forms.Button btnWriteOff; 
         private System.Windows.Forms.Button btnEdit;
         private System.Windows.Forms.Button btnClose;
     }

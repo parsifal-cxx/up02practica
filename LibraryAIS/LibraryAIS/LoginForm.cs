@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Drawing;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 
@@ -7,11 +8,16 @@ namespace LibraryAIS
 {
     public partial class LoginForm : Form
     {
-        private int failedAttempts = 0; // Счетчик неудачных попыток
+        private int failedAttempts = 0;
+        private CaptchaGenerator captchaGenerator;
+        private string currentCaptcha = "";
+        private int blockTimeLeft = 0;
+        private Timer blockTimer;
 
         public LoginForm()
         {
             InitializeComponent();
+            captchaGenerator = new CaptchaGenerator();
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -31,6 +37,28 @@ namespace LibraryAIS
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtPassword.Focus();
                 return;
+            }
+
+            // Проверка CAPTCHA если она активна
+            if (captchaPanel.Visible)
+            {
+                if (string.IsNullOrWhiteSpace(txtCaptcha.Text))
+                {
+                    MessageBox.Show("Введите код с картинки!", "Ошибка",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtCaptcha.Focus();
+                    return;
+                }
+
+                if (!txtCaptcha.Text.Trim().Equals(currentCaptcha, StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show("Неверный код с картинки!", "Ошибка",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                    // Блокировка на 10 секунд
+                    StartBlockTimer();
+                    return;
+                }
             }
 
             // Попытка авторизации
@@ -61,8 +89,9 @@ namespace LibraryAIS
                 CurrentUser.RoleID = Convert.ToInt32(user["Role"]);
                 CurrentUser.RoleName = user["RoleName"].ToString();
 
-                // Сброс счетчика
+                // Сброс счетчика и скрытие CAPTCHA
                 failedAttempts = 0;
+                HideCaptcha();
 
                 // Открываем главную форму
                 MainForm mainForm = new MainForm();
@@ -73,6 +102,7 @@ namespace LibraryAIS
                 CurrentUser.Clear();
                 txtLogin.Clear();
                 txtPassword.Clear();
+                txtCaptcha.Clear();
                 this.Show();
             }
             else
@@ -82,20 +112,72 @@ namespace LibraryAIS
                 MessageBox.Show("Неверный логин или пароль!", "Ошибка авторизации",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                // При повторной неудачной попытке очищаем поля
-                if (failedAttempts > 1)
+                // После первой неудачной попытки показываем CAPTCHA
+                if (failedAttempts == 1)
                 {
-                    txtLogin.Clear();
-                    txtPassword.Clear();
-                    txtLogin.Focus();
-                }
-                else
-                {
+                    ShowCaptcha();
                     txtPassword.Clear();
                     txtPassword.Focus();
                 }
+                else if (failedAttempts > 1)
+                {
+                    // Блокировка на 10 секунд
+                    StartBlockTimer();
+                }
             }
         }
+
+        private void ShowCaptcha()
+        {
+            captchaPanel.Visible = true;
+            GenerateNewCaptcha();
+
+            // Изменяем размер формы
+            this.Height = 400;
+            panelMain.Height = 400;
+        }
+
+        private void HideCaptcha()
+        {
+            captchaPanel.Visible = false;
+            txtCaptcha.Clear();
+
+            // Возвращаем исходный размер формы
+            this.Height = 260;
+            panelMain.Height = 260;
+        }
+
+        private void GenerateNewCaptcha()
+        {
+            Bitmap captchaImage = captchaGenerator.GenerateCaptchaImage(300, 80);
+            currentCaptcha = captchaGenerator.CaptchaText;
+            pictureBoxCaptcha.Image = captchaImage;
+            txtCaptcha.Clear();
+            txtCaptcha.Focus();
+        }
+
+        private void btnRefreshCaptcha_Click(object sender, EventArgs e)
+        {
+            GenerateNewCaptcha();
+        }
+
+        private void StartBlockTimer()
+        {
+            blockTimeLeft = 10;
+            lblBlockMessage.Text = $"Вход заблокирован на {blockTimeLeft} секунд...";
+            lblBlockMessage.Visible = true;
+
+            // Блокируем элементы управления
+            txtLogin.Enabled = false;
+            txtPassword.Enabled = false;
+            txtCaptcha.Enabled = false;
+            btnLogin.Enabled = false;
+            btnRefreshCaptcha.Enabled = false;
+
+            blockTimer.Start();
+        }
+
+        
 
         private void btnExit_Click(object sender, EventArgs e)
         {
@@ -105,6 +187,18 @@ namespace LibraryAIS
             {
                 Application.Exit();
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                    components.Dispose();
+                if (blockTimer != null)
+                    blockTimer.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

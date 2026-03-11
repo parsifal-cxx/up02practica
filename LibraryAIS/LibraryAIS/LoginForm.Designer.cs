@@ -165,7 +165,7 @@
             this.btnRefreshCaptcha.TabIndex = 9;
             this.btnRefreshCaptcha.Text = "Обновить";
             this.btnRefreshCaptcha.UseVisualStyleBackColor = false;
-            //this.btnRefreshCaptcha.Click += new System.EventHandler(this.btnRefreshCaptcha_Click);
+            this.btnRefreshCaptcha.Click += new System.EventHandler(this.btnRefreshCaptcha_Click);
             // 
             // txtCaptcha
             // 

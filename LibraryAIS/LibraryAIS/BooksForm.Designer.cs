@@ -311,6 +311,62 @@
             this.btnNextPage.UseVisualStyleBackColor = false;
             this.btnNextPage.Click += new System.EventHandler(this.btnNextPage_Click);
             // 
+            // panelLegend
+            // 
+            this.panelLegend = new System.Windows.Forms.Panel();
+            this.lblLegendTitle = new System.Windows.Forms.Label();
+            this.lblLegendCritical = new System.Windows.Forms.Label();
+            this.lblLegendWarning = new System.Windows.Forms.Label();
+            this.lblLegendLow = new System.Windows.Forms.Label();
+            this.lblLegendNormal = new System.Windows.Forms.Label();
+            this.panelLegend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelLegend.BackColor = System.Drawing.Color.White;
+            this.panelLegend.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelLegend.Controls.Add(this.lblLegendTitle);
+            this.panelLegend.Controls.Add(this.lblLegendCritical);
+            this.panelLegend.Controls.Add(this.lblLegendWarning);
+            this.panelLegend.Controls.Add(this.lblLegendLow);
+            this.panelLegend.Controls.Add(this.lblLegendNormal);
+            this.panelLegend.Location = new System.Drawing.Point(730, 125);
+            this.panelLegend.Name = "panelLegend";
+            this.panelLegend.Size = new System.Drawing.Size(260, 110);
+            this.panelLegend.TabIndex = 5;
+            this.lblLegendTitle.Font = new System.Drawing.Font("Segoe UI", 8F, System.Drawing.FontStyle.Bold);
+            this.lblLegendTitle.Location = new System.Drawing.Point(5, 3);
+            this.lblLegendTitle.Name = "lblLegendTitle";
+            this.lblLegendTitle.Size = new System.Drawing.Size(250, 15);
+            this.lblLegendTitle.Text = "Обозначения:";
+            this.lblLegendCritical.BackColor = System.Drawing.Color.FromArgb(255, 200, 200);
+            this.lblLegendCritical.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+            this.lblLegendCritical.Location = new System.Drawing.Point(5, 20);
+            this.lblLegendCritical.Name = "lblLegendCritical";
+            this.lblLegendCritical.Size = new System.Drawing.Size(250, 20);
+            this.lblLegendCritical.Text = "  Нет в наличии (0 экз.)";
+            this.lblLegendCritical.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblLegendWarning.BackColor = System.Drawing.Color.FromArgb(255, 220, 200);
+            this.lblLegendWarning.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+            this.lblLegendWarning.Location = new System.Drawing.Point(5, 42);
+            this.lblLegendWarning.Name = "lblLegendWarning";
+            this.lblLegendWarning.Size = new System.Drawing.Size(250, 20);
+            this.lblLegendWarning.Text = "  Критический остаток (≤3 экз.)";
+            this.lblLegendWarning.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblLegendLow.BackColor = System.Drawing.Color.FromArgb(255, 255, 200);
+            this.lblLegendLow.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+            this.lblLegendLow.Location = new System.Drawing.Point(5, 64);
+            this.lblLegendLow.Name = "lblLegendLow";
+            this.lblLegendLow.Size = new System.Drawing.Size(250, 20);
+            this.lblLegendLow.Text = "  Малый остаток (≤10 экз.)";
+            this.lblLegendLow.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblLegendNormal.BackColor = System.Drawing.Color.White;
+            this.lblLegendNormal.Font = new System.Drawing.Font("Segoe UI", 7.5F);
+            this.lblLegendNormal.Location = new System.Drawing.Point(5, 86);
+            this.lblLegendNormal.Name = "lblLegendNormal";
+            this.lblLegendNormal.Size = new System.Drawing.Size(250, 20);
+            this.lblLegendNormal.Text = "  Нормальный остаток";
+            this.lblLegendNormal.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.Controls.Add(this.panelLegend);
+            this.panelLegend.BringToFront();
+            // 
             // BooksForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -339,6 +395,12 @@
             this.ResumeLayout(false);
 
         }
+        private System.Windows.Forms.Panel panelLegend;
+        private System.Windows.Forms.Label lblLegendTitle;
+        private System.Windows.Forms.Label lblLegendCritical;
+        private System.Windows.Forms.Label lblLegendWarning;
+        private System.Windows.Forms.Label lblLegendLow;
+        private System.Windows.Forms.Label lblLegendNormal;
         private System.Windows.Forms.Panel panelPagination;
         private System.Windows.Forms.Button btnPrevPage;
         private System.Windows.Forms.Button btnNextPage;

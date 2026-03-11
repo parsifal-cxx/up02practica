@@ -12,10 +12,17 @@ namespace LibraryAIS
         private DataView booksView;
         private PaginationHelper pagination;
 
+        // Константы для условного форматирования
+        private const int CRITICAL_STOCK_LEVEL = 3;  // Критический остаток
+        private const int WARNING_STOCK_LEVEL = 10;  // Предупреждение
+
         public BooksForm()
         {
             InitializeComponent();
             pagination = new PaginationHelper(20); // 20 записей на страницу
+
+            // Подписываемся на событие завершения привязки данных
+            dgvBooks.DataBindingComplete += DgvBooks_DataBindingComplete;
         }
 
         private void BooksForm_Load(object sender, EventArgs e)
@@ -299,6 +306,120 @@ namespace LibraryAIS
                     pagination.GetStartRecord(),
                     pagination.GetEndRecord(),
                     pagination.TotalRecords);
+            }
+        }
+
+        // ============================================
+        // УСЛОВНОЕ ФОРМАТИРОВАНИЕ
+        // ============================================
+
+        /// <summary>
+        /// Обработчик события завершения привязки данных
+        /// </summary>
+        private void DgvBooks_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            ApplyConditionalFormatting();
+        }
+
+        /// <summary>
+        /// Применение условного форматирования к строкам таблицы
+        /// </summary>
+        private void ApplyConditionalFormatting()
+        {
+            if (dgvBooks.Rows.Count == 0)
+                return;
+
+            // Проверяем наличие необходимых колонок
+            if (!dgvBooks.Columns.Contains("Доступно") || !dgvBooks.Columns.Contains("Всего"))
+                return;
+
+            foreach (DataGridViewRow row in dgvBooks.Rows)
+            {
+                try
+                {
+                    // Получаем значения
+                    object availableObj = row.Cells["Доступно"].Value;
+                    object totalObj = row.Cells["Всего"].Value;
+
+                    if (availableObj == null || availableObj == DBNull.Value ||
+                        totalObj == null || totalObj == DBNull.Value)
+                        continue;
+
+                    int availableCount = Convert.ToInt32(availableObj);
+                    int totalCount = Convert.ToInt32(totalObj);
+
+                    // Определяем цвет строки на основе остатков
+                    Color rowColor = GetRowColor(availableCount, totalCount);
+
+                    // Применяем форматирование
+                    ApplyRowFormatting(row, rowColor);
+                }
+                catch (Exception ex)
+                {
+                    // Игнорируем ошибки преобразования для конкретной строки
+                    System.Diagnostics.Debug.WriteLine($"Ошибка форматирования строки: {ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Определение цвета строки на основе количества доступных книг
+        /// </summary>
+        private Color GetRowColor(int availableCount, int totalCount)
+        {
+            // Критический уровень - все книги выданы или очень мало
+            if (availableCount == 0)
+            {
+                return Color.FromArgb(255, 200, 200); // Светло-красный
+            }
+            else if (availableCount <= CRITICAL_STOCK_LEVEL)
+            {
+                return Color.FromArgb(255, 220, 200); // Оранжевый
+            }
+            // Предупреждение - мало книг
+            else if (availableCount <= WARNING_STOCK_LEVEL)
+            {
+                return Color.FromArgb(255, 255, 200); // Светло-желтый
+            }
+            // Дополнительная проверка: если доступно менее 30% от общего количества
+            else if (totalCount > 0 && (double)availableCount / totalCount < 0.3)
+            {
+                return Color.FromArgb(255, 245, 220); // Очень светло-желтый
+            }
+            // Нормальный уровень
+            else
+            {
+                return Color.White; // Обычный белый фон
+            }
+        }
+
+        /// <summary>
+        /// Применение форматирования к строке
+        /// </summary>
+        private void ApplyRowFormatting(DataGridViewRow row, Color backgroundColor)
+        {
+            row.DefaultCellStyle.BackColor = backgroundColor;
+
+            // Настройка цвета текста для лучшей читаемости
+            if (backgroundColor.R < 128 || backgroundColor.G < 128 || backgroundColor.B < 128)
+            {
+                row.DefaultCellStyle.ForeColor = Color.White;
+            }
+            else
+            {
+                row.DefaultCellStyle.ForeColor = Color.Black;
+            }
+
+            // Выделяем колонку "Доступно" жирным шрифтом для критических значений
+            if (row.Cells["Доступно"].Value != null &&
+                row.Cells["Доступно"].Value != DBNull.Value)
+            {
+                int available = Convert.ToInt32(row.Cells["Доступно"].Value);
+
+                if (available <= CRITICAL_STOCK_LEVEL)
+                {
+                    row.Cells["Доступно"].Style.Font = new Font(dgvBooks.Font, FontStyle.Bold);
+                }
             }
         }
 

@@ -138,8 +138,8 @@ namespace LibraryAIS
             GenerateNewCaptcha();
 
             // Изменяем размер формы
-            this.Height = 400;
-            panelMain.Height = 400;
+            this.Height = 410;
+            panelMain.Height = 410;
         }
 
         private void HideCaptcha()
@@ -148,8 +148,8 @@ namespace LibraryAIS
             txtCaptcha.Clear();
 
             // Возвращаем исходный размер формы
-            this.Height = 260;
-            panelMain.Height = 260;
+            this.Height = 290;
+            panelMain.Height = 290;
         }
 
         private void GenerateNewCaptcha()
@@ -222,16 +222,9 @@ namespace LibraryAIS
             }
         }
 
-        protected override void Dispose(bool disposing)
+        private void pictureBoxCaptcha_Click(object sender, EventArgs e)
         {
-            if (disposing)
-            {
-                if (components != null)
-                    components.Dispose();
-                if (blockTimer != null)
-                    blockTimer.Dispose();
-            }
-            base.Dispose(disposing);
+
         }
     }
 }

@@ -9,7 +9,6 @@ namespace LibraryAIS
     public partial class BooksForm : Form
     {
         private DataTable booksTable;
-        private DataView booksView;
         private PaginationHelper pagination;
 
         // Константы для условного форматирования
@@ -424,7 +423,7 @@ namespace LibraryAIS
         }
 
         // ============================================
-        // МЕТОДЫ ПАГИНАЦИИ
+        // МЕТОДЫ ПАГИНАЦИИ (УПРОЩЕННАЯ ВЕРСИЯ)
         // ============================================
 
         /// <summary>
@@ -436,118 +435,12 @@ namespace LibraryAIS
             btnPrevPage.Enabled = pagination.HasPreviousPage;
             btnNextPage.Enabled = pagination.HasNextPage;
 
-            // Создаем кнопки страниц
-            CreatePageButtons();
-        }
+            // Обновляем текстовые поля
+            txtCurrentPage.Text = pagination.CurrentPage.ToString();
+            lblPageInfo.Text = $"из {pagination.TotalPages}";
 
-        /// <summary>
-        /// Создание кнопок для перехода по страницам
-        /// </summary>
-        private void CreatePageButtons()
-        {
-            // Очищаем панель
-            flowPanelPages.Controls.Clear();
-
-            if (pagination.TotalPages == 0)
-                return;
-
-            // Получаем диапазон страниц для отображения
-            int[] pageRange = pagination.GetPageRange(7);
-
-            // Добавляем кнопку "Первая" если нужно
-            if (pageRange[0] > 1)
-            {
-                Button btnFirst = CreatePageButton(1, "1");
-                flowPanelPages.Controls.Add(btnFirst);
-
-                if (pageRange[0] > 2)
-                {
-                    Label lblDots = new Label
-                    {
-                        Text = "...",
-                        AutoSize = true,
-                        TextAlign = ContentAlignment.MiddleCenter,
-                        Width = 30,
-                        Height = 30,
-                        Font = new Font("Segoe UI", 10F, FontStyle.Bold)
-                    };
-                    flowPanelPages.Controls.Add(lblDots);
-                }
-            }
-
-            // Создаем кнопки для диапазона страниц
-            foreach (int pageNumber in pageRange)
-            {
-                Button btnPage = CreatePageButton(pageNumber, pageNumber.ToString());
-                flowPanelPages.Controls.Add(btnPage);
-            }
-
-            // Добавляем кнопку "Последняя" если нужно
-            if (pageRange[pageRange.Length - 1] < pagination.TotalPages)
-            {
-                if (pageRange[pageRange.Length - 1] < pagination.TotalPages - 1)
-                {
-                    Label lblDots = new Label
-                    {
-                        Text = "...",
-                        AutoSize = true,
-                        TextAlign = ContentAlignment.MiddleCenter,
-                        Width = 30,
-                        Height = 30,
-                        Font = new Font("Segoe UI", 10F, FontStyle.Bold)
-                    };
-                    flowPanelPages.Controls.Add(lblDots);
-                }
-
-                Button btnLast = CreatePageButton(pagination.TotalPages, pagination.TotalPages.ToString());
-                flowPanelPages.Controls.Add(btnLast);
-            }
-        }
-
-        /// <summary>
-        /// Создание кнопки страницы
-        /// </summary>
-        private Button CreatePageButton(int pageNumber, string text)
-        {
-            Button btn = new Button
-            {
-                Text = text,
-                Width = 35,
-                Height = 30,
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                Tag = pageNumber
-            };
-
-            // Подсветка текущей страницы
-            if (pageNumber == pagination.CurrentPage)
-            {
-                btn.BackColor = Color.FromArgb(70, 130, 180);
-                btn.ForeColor = Color.White;
-                btn.Enabled = false; // Текущая страница не кликабельна
-            }
-            else
-            {
-                btn.BackColor = Color.White;
-                btn.ForeColor = Color.FromArgb(70, 130, 180);
-                btn.FlatAppearance.BorderColor = Color.FromArgb(70, 130, 180);
-            }
-
-            btn.Click += PageButton_Click;
-
-            return btn;
-        }
-
-        /// <summary>
-        /// Обработчик клика по кнопке страницы
-        /// </summary>
-        private void PageButton_Click(object sender, EventArgs e)
-        {
-            Button btn = sender as Button;
-            if (btn == null || btn.Tag == null) return;
-
-            int pageNumber = (int)btn.Tag;
-            GoToPage(pageNumber);
+            // Блокируем кнопку "Перейти" если страниц нет
+            btnGoToPage.Enabled = pagination.TotalPages > 0;
         }
 
         /// <summary>
@@ -559,6 +452,12 @@ namespace LibraryAIS
             {
                 LoadPageData();
                 UpdatePaginationControls();
+            }
+            else
+            {
+                MessageBox.Show($"Номер страницы должен быть от 1 до {pagination.TotalPages}",
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtCurrentPage.Text = pagination.CurrentPage.ToString();
             }
         }
 
@@ -583,6 +482,42 @@ namespace LibraryAIS
             {
                 LoadPageData();
                 UpdatePaginationControls();
+            }
+        }
+
+        /// <summary>
+        /// Обработчик кнопки "Перейти"
+        /// </summary>
+        private void btnGoToPage_Click(object sender, EventArgs e)
+        {
+            if (int.TryParse(txtCurrentPage.Text, out int pageNumber))
+            {
+                GoToPage(pageNumber);
+            }
+            else
+            {
+                MessageBox.Show("Введите корректный номер страницы!",
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtCurrentPage.Text = pagination.CurrentPage.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Обработчик нажатия клавиш в поле номера страницы
+        /// </summary>
+        private void txtCurrentPage_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Разрешаем только цифры и управляющие клавиши
+            if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+
+            // Переход по Enter
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                e.Handled = true;
+                btnGoToPage_Click(sender, e);
             }
         }
 
@@ -771,6 +706,11 @@ namespace LibraryAIS
                 BookViewForm viewForm = new BookViewForm(bookId);
                 viewForm.ShowDialog();
             }
+        }
+
+        private void lblLegendLow_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

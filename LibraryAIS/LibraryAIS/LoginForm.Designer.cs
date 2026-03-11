@@ -10,6 +10,11 @@
             {
                 components.Dispose();
             }
+            if (disposing && blockTimer != null)
+            {
+                blockTimer.Stop();
+                blockTimer.Dispose();
+            }
             base.Dispose(disposing);
         }
 
@@ -126,7 +131,7 @@
             this.panelMain.Controls.Add(this.btnExit);
             this.panelMain.Location = new System.Drawing.Point(0, 0);
             this.panelMain.Name = "panelMain";
-            this.panelMain.Size = new System.Drawing.Size(400, 260);
+            this.panelMain.Size = new System.Drawing.Size(400, 400);
             this.panelMain.TabIndex = 7;
             // 
             // lblBlockMessage
@@ -135,7 +140,7 @@
             this.lblBlockMessage.ForeColor = System.Drawing.Color.Red;
             this.lblBlockMessage.Location = new System.Drawing.Point(50, 245);
             this.lblBlockMessage.Name = "lblBlockMessage";
-            this.lblBlockMessage.Size = new System.Drawing.Size(300, 25);
+            this.lblBlockMessage.Size = new System.Drawing.Size(300, 15);
             this.lblBlockMessage.TabIndex = 10;
             this.lblBlockMessage.Text = "Вход заблокирован...";
             this.lblBlockMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -147,9 +152,9 @@
             this.captchaPanel.Controls.Add(this.txtCaptcha);
             this.captchaPanel.Controls.Add(this.lblCaptcha);
             this.captchaPanel.Controls.Add(this.pictureBoxCaptcha);
-            this.captchaPanel.Location = new System.Drawing.Point(10, 280);
+            this.captchaPanel.Location = new System.Drawing.Point(10, 245);
             this.captchaPanel.Name = "captchaPanel";
-            this.captchaPanel.Size = new System.Drawing.Size(380, 110);
+            this.captchaPanel.Size = new System.Drawing.Size(380, 145);
             this.captchaPanel.TabIndex = 8;
             this.captchaPanel.Visible = false;
             // 
@@ -159,7 +164,7 @@
             this.btnRefreshCaptcha.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRefreshCaptcha.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.btnRefreshCaptcha.ForeColor = System.Drawing.Color.White;
-            this.btnRefreshCaptcha.Location = new System.Drawing.Point(240, 70);
+            this.btnRefreshCaptcha.Location = new System.Drawing.Point(240, 93);
             this.btnRefreshCaptcha.Name = "btnRefreshCaptcha";
             this.btnRefreshCaptcha.Size = new System.Drawing.Size(100, 26);
             this.btnRefreshCaptcha.TabIndex = 9;
@@ -170,7 +175,7 @@
             // txtCaptcha
             // 
             this.txtCaptcha.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.txtCaptcha.Location = new System.Drawing.Point(40, 70);
+            this.txtCaptcha.Location = new System.Drawing.Point(40, 93);
             this.txtCaptcha.MaxLength = 4;
             this.txtCaptcha.Name = "txtCaptcha";
             this.txtCaptcha.Size = new System.Drawing.Size(180, 26);
@@ -180,21 +185,22 @@
             // 
             this.lblCaptcha.AutoSize = true;
             this.lblCaptcha.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.lblCaptcha.Location = new System.Drawing.Point(37, 47);
+            this.lblCaptcha.Location = new System.Drawing.Point(37, 73);
             this.lblCaptcha.Name = "lblCaptcha";
-            this.lblCaptcha.Size = new System.Drawing.Size(243, 17);
+            this.lblCaptcha.Size = new System.Drawing.Size(223, 17);
             this.lblCaptcha.TabIndex = 7;
             this.lblCaptcha.Text = "Введите код с изображения:";
             // 
             // pictureBoxCaptcha
             // 
             this.pictureBoxCaptcha.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBoxCaptcha.Location = new System.Drawing.Point(40, 5);
+            this.pictureBoxCaptcha.Location = new System.Drawing.Point(44, -4);
             this.pictureBoxCaptcha.Name = "pictureBoxCaptcha";
-            this.pictureBoxCaptcha.Size = new System.Drawing.Size(300, 80);
+            this.pictureBoxCaptcha.Size = new System.Drawing.Size(296, 81);
             this.pictureBoxCaptcha.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBoxCaptcha.TabIndex = 6;
             this.pictureBoxCaptcha.TabStop = false;
+            this.pictureBoxCaptcha.Click += new System.EventHandler(this.pictureBoxCaptcha_Click);
             // 
             // LoginForm
             // 
@@ -202,7 +208,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(400, 260);
+            this.ClientSize = new System.Drawing.Size(400, 251);
             this.Controls.Add(this.panelMain);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -216,6 +222,7 @@
             this.captchaPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCaptcha)).EndInit();
             this.ResumeLayout(false);
+
         }
 
         private System.Windows.Forms.Label lblTitle;

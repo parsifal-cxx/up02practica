@@ -18,6 +18,11 @@ namespace LibraryAIS
         {
             InitializeComponent();
             captchaGenerator = new CaptchaGenerator();
+
+            // Инициализация таймера блокировки
+            blockTimer = new Timer();
+            blockTimer.Interval = 1000; // 1 секунда
+            blockTimer.Tick += BlockTimer_Tick;
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -177,7 +182,35 @@ namespace LibraryAIS
             blockTimer.Start();
         }
 
-        
+        private void BlockTimer_Tick(object sender, EventArgs e)
+        {
+            blockTimeLeft--;
+
+            if (blockTimeLeft > 0)
+            {
+                lblBlockMessage.Text = $"Вход заблокирован на {blockTimeLeft} секунд...";
+            }
+            else
+            {
+                // Разблокировка
+                blockTimer.Stop();
+                lblBlockMessage.Visible = false;
+
+                txtLogin.Enabled = true;
+                txtPassword.Enabled = true;
+                txtCaptcha.Enabled = true;
+                btnLogin.Enabled = true;
+                btnRefreshCaptcha.Enabled = true;
+
+                // Генерируем новую CAPTCHA
+                GenerateNewCaptcha();
+
+                txtLogin.Clear();
+                txtPassword.Clear();
+                txtCaptcha.Clear();
+                txtLogin.Focus();
+            }
+        }
 
         private void btnExit_Click(object sender, EventArgs e)
         {

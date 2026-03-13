@@ -23,7 +23,6 @@ namespace LibraryAIS
 
         private void ConfigureButtonsByRole()
         {
-            // Библиотекарь может только просматривать
             if (CurrentUser.IsLibrarian)
             {
                 btnAdd.Visible = false;
@@ -49,21 +48,104 @@ namespace LibraryAIS
 
         private void LoadStudents()
         {
-            string query = @"SELECT s.StudentID, s.Surname as 'Фамилия', s.Name as 'Имя', 
-                            s.Patronymic as 'Отчество', g.Name as 'Группа', s.Phone as 'Телефон',
+            string query = @"SELECT 
+                            s.StudentID,
+                            s.Surname as RawSurname,
+                            s.Name as RawName,
+                            s.Patronymic as RawPatronymic,
+                            g.Name as 'Группа',
+                            s.Phone as RawPhone,
                             s.`Group` as GroupID
                             FROM students s
                             LEFT JOIN `groups` g ON s.`Group` = g.GroupID
                             ORDER BY s.Surname";
 
             studentsTable = DatabaseHelper.ExecuteQuery(query);
+
+            if (!studentsTable.Columns.Contains("Фамилия"))
+                studentsTable.Columns.Add("Фамилия", typeof(string));
+            if (!studentsTable.Columns.Contains("Имя"))
+                studentsTable.Columns.Add("Имя", typeof(string));
+            if (!studentsTable.Columns.Contains("Отчество"))
+                studentsTable.Columns.Add("Отчество", typeof(string));
+            if (!studentsTable.Columns.Contains("Телефон"))
+                studentsTable.Columns.Add("Телефон", typeof(string));
+
+            ApplyPersonalDataMasking();
+
             studentsView = new DataView(studentsTable);
             dgvStudents.DataSource = studentsView;
 
+            ConfigureGridColumns();
+        }
+
+        private void ApplyPersonalDataMasking()
+        {
+            foreach (DataRow row in studentsTable.Rows)
+            {
+                row["Фамилия"] = MaskNamePart(row["RawSurname"]?.ToString());
+                row["Имя"] = MaskNamePart(row["RawName"]?.ToString());
+                row["Отчество"] = MaskNamePart(row["RawPatronymic"]?.ToString());
+                row["Телефон"] = MaskPhone(row["RawPhone"]?.ToString());
+            }
+        }
+
+        private string MaskNamePart(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return "";
+
+            value = value.Trim();
+
+            if (value.Length == 1)
+                return "*";
+
+            return value.Substring(0, 1) + new string('*', value.Length - 1);
+        }
+
+        private string MaskPhone(string phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone))
+                return "";
+
+            phone = phone.Trim();
+
+            if (phone.Length <= 2)
+                return new string('*', phone.Length);
+
+            if (phone.Length <= 4)
+                return new string('*', phone.Length - 1) + phone.Substring(phone.Length - 1);
+
+            return phone.Substring(0, 2) +
+                   new string('*', phone.Length - 4) +
+                   phone.Substring(phone.Length - 2);
+        }
+
+        private void ConfigureGridColumns()
+        {
             if (dgvStudents.Columns.Contains("StudentID"))
                 dgvStudents.Columns["StudentID"].Visible = false;
             if (dgvStudents.Columns.Contains("GroupID"))
                 dgvStudents.Columns["GroupID"].Visible = false;
+            if (dgvStudents.Columns.Contains("RawSurname"))
+                dgvStudents.Columns["RawSurname"].Visible = false;
+            if (dgvStudents.Columns.Contains("RawName"))
+                dgvStudents.Columns["RawName"].Visible = false;
+            if (dgvStudents.Columns.Contains("RawPatronymic"))
+                dgvStudents.Columns["RawPatronymic"].Visible = false;
+            if (dgvStudents.Columns.Contains("RawPhone"))
+                dgvStudents.Columns["RawPhone"].Visible = false;
+
+            if (dgvStudents.Columns.Contains("Фамилия"))
+                dgvStudents.Columns["Фамилия"].DisplayIndex = 0;
+            if (dgvStudents.Columns.Contains("Имя"))
+                dgvStudents.Columns["Имя"].DisplayIndex = 1;
+            if (dgvStudents.Columns.Contains("Отчество"))
+                dgvStudents.Columns["Отчество"].DisplayIndex = 2;
+            if (dgvStudents.Columns.Contains("Группа"))
+                dgvStudents.Columns["Группа"].DisplayIndex = 3;
+            if (dgvStudents.Columns.Contains("Телефон"))
+                dgvStudents.Columns["Телефон"].DisplayIndex = 4;
         }
 
         private void ApplyFilters()
@@ -72,14 +154,12 @@ namespace LibraryAIS
 
             string filter = "";
 
-            // Поиск по ФИО
             if (!string.IsNullOrWhiteSpace(txtSearch.Text))
             {
                 string searchText = txtSearch.Text.Replace("'", "''");
-                filter = "(Фамилия LIKE '%" + searchText + "%' OR Имя LIKE '%" + searchText + "%' OR Отчество LIKE '%" + searchText + "%')";
+                filter = "(RawSurname LIKE '%" + searchText + "%' OR RawName LIKE '%" + searchText + "%' OR RawPatronymic LIKE '%" + searchText + "%')";
             }
 
-            // Фильтр по группе
             if (cmbFilterGroup.SelectedValue != null && Convert.ToInt32(cmbFilterGroup.SelectedValue) > 0)
             {
                 if (!string.IsNullOrEmpty(filter)) filter += " AND ";

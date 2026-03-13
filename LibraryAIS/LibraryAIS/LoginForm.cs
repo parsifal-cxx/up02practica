@@ -83,7 +83,26 @@ namespace LibraryAIS
                     return;
                 }
 
-                
+                // Открываем форму управления БД
+                this.Hide();
+                DatabaseManagementForm dbForm = new DatabaseManagementForm();
+
+                if (dbForm.ShowDialog() == DialogResult.OK)
+                {
+                    // После работы с БД возвращаемся к обычной авторизации
+                    CurrentUser.Clear();
+                    txtLogin.Clear();
+                    txtPassword.Clear();
+                    HideCaptcha();
+                    this.Show();
+                    txtLogin.Focus();
+                }
+                else
+                {
+                    // Пользователь закрыл форму управления БД - выход
+                    Application.Exit();
+                }
+                return;
             }
 
 
@@ -226,8 +245,7 @@ namespace LibraryAIS
             captchaPanel.Visible = true;
             GenerateNewCaptcha();
 
-            this.Height = 410;
-            panelMain.Height = 410;
+            this.ClientSize = new Size(532, 460);
         }
 
         private void HideCaptcha()
@@ -235,8 +253,7 @@ namespace LibraryAIS
             captchaPanel.Visible = false;
             txtCaptcha.Clear();
 
-            this.Height = 290;
-            panelMain.Height = 290;
+            this.ClientSize = new Size(532, 309);
         }
 
         private void GenerateNewCaptcha()

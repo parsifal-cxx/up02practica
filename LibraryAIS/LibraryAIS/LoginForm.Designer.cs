@@ -131,6 +131,7 @@
             this.panelMain.Controls.Add(this.txtPassword);
             this.panelMain.Controls.Add(this.btnLogin);
             this.panelMain.Controls.Add(this.btnExit);
+            this.panelMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelMain.Location = new System.Drawing.Point(0, 0);
             this.panelMain.Name = "panelMain";
             this.panelMain.Size = new System.Drawing.Size(400, 400);

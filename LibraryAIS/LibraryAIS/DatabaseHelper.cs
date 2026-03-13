@@ -9,7 +9,7 @@ namespace LibraryAIS
     {
         // Строка подключения. 
         // TreatTinyAsBoolean=false важен для корректной работы с числами (Count, AvailableNow)
-        private static string connectionString = "Server=10.207.106.12;Database=db82;Uid=user82;Pwd=qt33;TreatTinyAsBoolean=false;";
+        private static string connectionString = "Server=localhost;Database=db82;Uid=root;Pwd=root;TreatTinyAsBoolean=false;";
 
         // Получение подключения
         public static MySqlConnection GetConnection()

@@ -62,12 +62,8 @@ namespace LibraryAIS
 
             studentsTable = DatabaseHelper.ExecuteQuery(query);
 
-            if (!studentsTable.Columns.Contains("Фамилия"))
-                studentsTable.Columns.Add("Фамилия", typeof(string));
-            if (!studentsTable.Columns.Contains("Имя"))
-                studentsTable.Columns.Add("Имя", typeof(string));
-            if (!studentsTable.Columns.Contains("Отчество"))
-                studentsTable.Columns.Add("Отчество", typeof(string));
+            if (!studentsTable.Columns.Contains("ФИО"))
+                studentsTable.Columns.Add("ФИО", typeof(string));
             if (!studentsTable.Columns.Contains("Телефон"))
                 studentsTable.Columns.Add("Телефон", typeof(string));
 
@@ -83,24 +79,30 @@ namespace LibraryAIS
         {
             foreach (DataRow row in studentsTable.Rows)
             {
-                row["Фамилия"] = MaskNamePart(row["RawSurname"]?.ToString());
-                row["Имя"] = MaskNamePart(row["RawName"]?.ToString());
-                row["Отчество"] = MaskNamePart(row["RawPatronymic"]?.ToString());
+                row["ФИО"] = BuildMaskedFio(
+                    row["RawSurname"]?.ToString(),
+                    row["RawName"]?.ToString(),
+                    row["RawPatronymic"]?.ToString());
+
                 row["Телефон"] = MaskPhone(row["RawPhone"]?.ToString());
             }
         }
 
-        private string MaskNamePart(string value)
+        private string BuildMaskedFio(string surname, string name, string patronymic)
         {
-            if (string.IsNullOrWhiteSpace(value))
-                return "";
+            surname = string.IsNullOrWhiteSpace(surname) ? "" : surname.Trim();
+            name = string.IsNullOrWhiteSpace(name) ? "" : name.Trim();
+            patronymic = string.IsNullOrWhiteSpace(patronymic) ? "" : patronymic.Trim();
 
-            value = value.Trim();
+            string result = surname;
 
-            if (value.Length == 1)
-                return "*";
+            if (!string.IsNullOrEmpty(name))
+                result += " " + name.Substring(0, 1) + ".";
 
-            return value.Substring(0, 1) + new string('*', value.Length - 1);
+            if (!string.IsNullOrEmpty(patronymic))
+                result += " " + patronymic.Substring(0, 1) + ".";
+
+            return result.Trim();
         }
 
         private string MaskPhone(string phone)
@@ -136,16 +138,12 @@ namespace LibraryAIS
             if (dgvStudents.Columns.Contains("RawPhone"))
                 dgvStudents.Columns["RawPhone"].Visible = false;
 
-            if (dgvStudents.Columns.Contains("Фамилия"))
-                dgvStudents.Columns["Фамилия"].DisplayIndex = 0;
-            if (dgvStudents.Columns.Contains("Имя"))
-                dgvStudents.Columns["Имя"].DisplayIndex = 1;
-            if (dgvStudents.Columns.Contains("Отчество"))
-                dgvStudents.Columns["Отчество"].DisplayIndex = 2;
+            if (dgvStudents.Columns.Contains("ФИО"))
+                dgvStudents.Columns["ФИО"].DisplayIndex = 0;
             if (dgvStudents.Columns.Contains("Группа"))
-                dgvStudents.Columns["Группа"].DisplayIndex = 3;
+                dgvStudents.Columns["Группа"].DisplayIndex = 1;
             if (dgvStudents.Columns.Contains("Телефон"))
-                dgvStudents.Columns["Телефон"].DisplayIndex = 4;
+                dgvStudents.Columns["Телефон"].DisplayIndex = 2;
         }
 
         private void ApplyFilters()

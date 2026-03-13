@@ -3,6 +3,7 @@ using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
+using LibraryAIS.Properties;
 
 namespace LibraryAIS
 {
@@ -25,6 +26,7 @@ namespace LibraryAIS
             blockTimer.Interval = 1000; // 1 секунда
             blockTimer.Tick += BlockTimer_Tick;
         }
+
         public LoginForm(bool isReturning) : this()
         {
             this.isReturningFromMainForm = isReturning;
@@ -32,7 +34,6 @@ namespace LibraryAIS
 
         private void LoginForm_Load(object sender, EventArgs e)
         {
-            // Если это повторный вход после блокировки - показываем информацию
             if (isReturningFromMainForm)
             {
                 lblTitle.Text = "Повторная авторизация";
@@ -58,6 +59,34 @@ namespace LibraryAIS
                 return;
             }
 
+            if (txtLogin.Text.Trim().Equals(Settings.Default.DefaultAdminLogin, StringComparison.OrdinalIgnoreCase) &&
+                txtPassword.Text == Settings.Default.DefaultAdminPassword)
+            {
+                // Вход как специальный администратор для управления БД
+                CurrentUser.UserID = -1; // Специальный ID
+                CurrentUser.Login = "admin";
+                CurrentUser.Name = "Системный";
+                CurrentUser.Surname = "Администратор";
+                CurrentUser.Patronymic = "";
+                CurrentUser.RoleID = 1; // Администратор
+                CurrentUser.RoleName = "Администратор";
+
+                // Сброс счетчика и скрытие CAPTCHA
+                failedAttempts = 0;
+                HideCaptcha();
+
+                // Если это повторный вход после блокировки - просто закрываем форму
+                if (isReturningFromMainForm)
+                {
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                    return;
+                }
+
+                
+            }
+
+
             // Проверка CAPTCHA если она активна
             if (captchaPanel.Visible)
             {
@@ -73,14 +102,12 @@ namespace LibraryAIS
                 {
                     MessageBox.Show("Неверный код с картинки!", "Ошибка",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                    // Блокировка на 10 секунд
                     StartBlockTimer();
                     return;
                 }
             }
 
-            // Попытка авторизации
+            // Попытка авторизации из БД
             string query = @"SELECT u.UserID, u.Login, u.Name, u.Surname, u.Patronymic, 
                             u.Role, r.Name as RoleName 
                             FROM users u 
@@ -93,9 +120,43 @@ namespace LibraryAIS
                 new MySqlParameter("@password", txtPassword.Text)
             };
 
-            DataTable result = DatabaseHelper.ExecuteQuery(query, parameters);
+            DataTable result = null;
 
-            if (result.Rows.Count > 0)
+            try
+            {
+                result = DatabaseHelper.ExecuteQuery(query, parameters);
+            }
+            catch (MySqlException ex)
+            {
+                // Ошибка подключения к БД
+                MessageBox.Show(
+                    "Ошибка подключения к базе данных!\n\n" +
+                    $"Детали ошибки: {ex.Message}\n\n" +
+                    "Возможные причины:\n" +
+                    "• База данных не создана\n" +
+                    "• Структура БД не восстановлена\n" +
+                    "• Сервер MySQL недоступен\n\n" +
+                    "Для восстановления базы данных используйте:\n" +
+                    "Логин: admin\n" +
+                    "Пароль: admin",
+                    "Ошибка подключения к БД",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return;
+            }
+            catch (Exception ex)
+            {
+                // Другие ошибки
+                MessageBox.Show(
+                    "Произошла непредвиденная ошибка:\n\n" + ex.Message +
+                    "\n\nДля восстановления БД используйте admin/admin",
+                    "Ошибка",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return;
+            }
+
+            if (result != null && result.Rows.Count > 0)
             {
                 // Успешная авторизация
                 DataRow user = result.Rows[0];
@@ -112,32 +173,25 @@ namespace LibraryAIS
                 failedAttempts = 0;
                 HideCaptcha();
 
-                // Если это повторный вход после блокировки - просто закрываем форму
                 if (isReturningFromMainForm)
                 {
-                    // Устанавливаем DialogResult.OK для MainForm
                     this.DialogResult = DialogResult.OK;
                     this.Close();
                     return;
                 }
 
-                // Первый вход - открываем MainForm и показываем LoginForm снова после закрытия
                 this.DialogResult = DialogResult.OK;
                 this.Hide();
 
                 MainForm mainForm = new MainForm();
                 mainForm.ShowDialog();
 
-                // После закрытия MainForm
-                // Если пользователь вышел нормально - закрываем LoginForm
                 if (mainForm.DialogResult != DialogResult.OK)
                 {
-                    // Пользователь вышел - закрываем приложение
                     Application.Exit();
                 }
                 else
                 {
-                    // Показываем форму авторизации снова (для возможности входа другого пользователя)
                     CurrentUser.Clear();
                     txtLogin.Clear();
                     txtPassword.Clear();
@@ -154,7 +208,6 @@ namespace LibraryAIS
                 MessageBox.Show("Неверный логин или пароль!", "Ошибка авторизации",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                // После первой неудачной попытки показываем CAPTCHA
                 if (failedAttempts == 1)
                 {
                     ShowCaptcha();
@@ -163,7 +216,6 @@ namespace LibraryAIS
                 }
                 else if (failedAttempts > 1)
                 {
-                    // Блокировка на 10 секунд
                     StartBlockTimer();
                 }
             }
@@ -174,7 +226,6 @@ namespace LibraryAIS
             captchaPanel.Visible = true;
             GenerateNewCaptcha();
 
-            // Изменяем размер формы
             this.Height = 410;
             panelMain.Height = 410;
         }
@@ -184,7 +235,6 @@ namespace LibraryAIS
             captchaPanel.Visible = false;
             txtCaptcha.Clear();
 
-            // Возвращаем исходный размер формы
             this.Height = 290;
             panelMain.Height = 290;
         }
@@ -209,7 +259,6 @@ namespace LibraryAIS
             lblBlockMessage.Text = $"Вход заблокирован на {blockTimeLeft} секунд...";
             lblBlockMessage.Visible = true;
 
-            // Блокируем элементы управления
             txtLogin.Enabled = false;
             txtPassword.Enabled = false;
             txtCaptcha.Enabled = false;
@@ -229,7 +278,6 @@ namespace LibraryAIS
             }
             else
             {
-                // Разблокировка
                 blockTimer.Stop();
                 lblBlockMessage.Visible = false;
 
@@ -239,7 +287,6 @@ namespace LibraryAIS
                 btnLogin.Enabled = true;
                 btnRefreshCaptcha.Enabled = true;
 
-                // Генерируем новую CAPTCHA
                 GenerateNewCaptcha();
 
                 txtLogin.Clear();
@@ -255,7 +302,6 @@ namespace LibraryAIS
                 "Подтверждение выхода", MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                // Если это повторный вход - устанавливаем Cancel
                 if (isReturningFromMainForm)
                 {
                     this.DialogResult = DialogResult.Cancel;
@@ -270,13 +316,6 @@ namespace LibraryAIS
 
         private void pictureBoxCaptcha_Click(object sender, EventArgs e)
         {
-
-        }
-
-        private void LoginForm_FormLoad(object sender, EventArgs e)
-        {
-
-            txtLogin.Focus();
         }
     }
 }

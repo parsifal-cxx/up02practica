@@ -10,11 +10,17 @@ namespace LibraryAIS
         // Строка подключения. 
         // TreatTinyAsBoolean=false важен для корректной работы с числами (Count, AvailableNow)
         private static string connectionString = "Server=localhost;Database=db82;Uid=root;Pwd=root;TreatTinyAsBoolean=false;";
+        private static string connectionStringCreateDB = "Server=localhost;Uid=root;Pwd=root;";
 
         // Получение подключения
         public static MySqlConnection GetConnection()
         {
             return new MySqlConnection(connectionString);
+        }
+        // Получение подключения для восстановления БД
+        public static MySqlConnection GetConnectionCreateDB()
+        {
+            return new MySqlConnection(connectionStringCreateDB);
         }
 
         // Тест подключения при запуске программы
@@ -94,6 +100,27 @@ namespace LibraryAIS
             try
             {
                 using (MySqlConnection conn = GetConnection())
+                {
+                    conn.Open();
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    result = cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при выполнении запроса: " + ex.Message,
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return result;
+        }
+
+        // Выполнение INSERT, UPDATE, DELETE (без параметров)
+        public static int ExecuteNonQueryCreateDB(string query)
+        {
+            int result = 0;
+            try
+            {
+                using (MySqlConnection conn = GetConnectionCreateDB())
                 {
                     conn.Open();
                     MySqlCommand cmd = new MySqlCommand(query, conn);

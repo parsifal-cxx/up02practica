@@ -26,8 +26,8 @@ namespace LibraryAIS
                     "Приложение будет закрыто.",
                     "Ошибка запуска",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-                return;
+                    MessageBoxIcon.Error
+                    );
             }
 
             Application.Run(new LoginForm());

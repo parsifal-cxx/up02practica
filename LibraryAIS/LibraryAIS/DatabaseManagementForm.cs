@@ -49,7 +49,7 @@ namespace LibraryAIS
         private void btnRestoreStructure_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(
-                "⚠ ВНИМАНИЕ! Эта операция выполнит следующие действия:\n\n" +
+                "ВНИМАНИЕ! Эта операция выполнит следующие действия:\n\n" +
                 "1. Удалит все существующие таблицы\n" +
                 "2. Удалит все данные из базы данных\n" +
                 "3. Создаст новую структуру БД\n\n" +
@@ -105,7 +105,7 @@ namespace LibraryAIS
 
                     try
                     {
-                        DatabaseHelper.ExecuteNonQuery(trimmedCommand);
+                        DatabaseHelper.ExecuteNonQueryCreateDB(trimmedCommand);
                         successCount++;
                     }
                     catch (MySqlException ex)
@@ -128,8 +128,8 @@ namespace LibraryAIS
 
                 // Формируем сообщение о результате
                 string message = "Восстановление структуры БД завершено!\n\n" +
-                                $"✓ Успешно выполнено команд: {successCount}\n" +
-                                $"✗ Ошибок: {errorCount}\n\n";
+                                $"Успешно выполнено команд: {successCount}\n" +
+                                $"Ошибок: {errorCount}\n\n";
 
                 if (errorCount > 0 && errorCount <= 5)
                 {

@@ -9,7 +9,7 @@ DROP TABLE IF EXISTS borrowings;
 DROP TABLE IF EXISTS bookcategories;
 DROP TABLE IF EXISTS books;
 DROP TABLE IF EXISTS students;
-DROP TABLE IF EXISTS groups;
+DROP TABLE IF EXISTS `groups`;
 DROP TABLE IF EXISTS publishers;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS authors;
@@ -55,7 +55,7 @@ CREATE TABLE publishers (
   PRIMARY KEY (PublisherID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE groups (
+CREATE TABLE `groups` (
   GroupID INT NOT NULL AUTO_INCREMENT,
   Name VARCHAR(50) NOT NULL,
   PRIMARY KEY (GroupID)
@@ -70,7 +70,7 @@ CREATE TABLE students (
   Phone VARCHAR(20) DEFAULT NULL,
   PRIMARY KEY (StudentID),
   KEY `Group` (`Group`),
-  CONSTRAINT Students_ibfk_1 FOREIGN KEY (`Group`) REFERENCES groups (GroupID)
+  CONSTRAINT Students_ibfk_1 FOREIGN KEY (`Group`) REFERENCES `groups` (GroupID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE books (

@@ -1,0 +1,11 @@
+﻿Login;Password;Name;Surname;Patronymic;Role
+db_admin;admin123;Админ;Системный;Александрович;1
+lib_head;head123;Иван;Иванов;Иванович;3
+librarian1;lib123;Мария;Петрова;Ивановна;2
+librarian2;lib234;Ольга;Сидорова;Алексеевна;2
+librarian3;lib345;Анна;Кузнецова;Петровна;2
+librarian4;lib456;Елена;Новикова;Сергеевна;2
+librarian5;lib567;Алексей;Васильев;Андреевич;2
+librarian6;lib678;Наталья;Смирнова;Дмитриевна;2
+librarian7;lib789;Сергей;Михайлов;Игоревич;2
+librarian8;lib890;Дмитрий;Федоров;Александрович;2
